@@ -1,0 +1,577 @@
+#include <raylib.h>
+#include <iostream>
+#include <cassert>
+#include <vector>
+using namespace std;
+
+template<class T>
+class LinkedList {
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(T data, Node* node) : data(data), next(node) {}
+    };
+    Node *head, *tail;
+    int length;
+
+public:
+    LinkedList() : head(nullptr), tail(nullptr), length(0) {}
+
+    ~LinkedList() { clear(); }
+
+    bool isEmpty() const { return length == 0; }
+
+    void pushBack(T data) {
+        Node* node = new Node{data, nullptr};
+        if (isEmpty()) {
+            head = tail = node;
+        } else {
+            tail->next = node;
+            tail = node;
+        }
+        ++length;
+    }
+
+    void pushFront(T data) {
+        Node* node = new Node{data, head};
+        head = node;
+        if (tail == nullptr) tail = node;
+        ++length;
+    }
+
+    void insert(int index, T data) {
+        if (index < 0 || index > length) return;
+        if (index == 0) { pushFront(data); return; }
+        if (index == length) { pushBack(data); return; }
+
+        Node* node = new Node{data, nullptr};
+        Node* current = head;
+        for (int i = 1; i < index; ++i) current = current->next;
+        node->next = current->next;
+        current->next = node;
+        ++length;
+    }
+
+    void popBack() {
+        if (isEmpty()) return;
+        if (length == 1) {
+            delete head;
+            head = tail = nullptr;
+        }
+        else {
+            Node* current = head;
+            while (current->next != tail) current = current->next;
+            delete tail;
+            tail = current;
+            tail->next = nullptr;
+        }
+        --length;
+    }
+
+    void popFront() {
+        if (isEmpty()) return;
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        if (head == nullptr) tail = nullptr;
+        --length;
+    }
+
+    void removeAt(int pos) {
+        if (isEmpty() || pos < 0 || pos >= length) return;
+        if (pos == 0) { popFront(); return; }
+
+        Node* current = head;
+        for (int i = 1; i < pos; ++i) current = current->next;
+        Node* temp = current->next;
+        current->next = temp->next;
+        if (temp == tail) tail = current;
+        delete temp;
+        --length;
+    }
+
+    void remove(T data) {
+        if (isEmpty()) return;
+        if (head->data == data) { popFront(); return; }
+
+        Node* current = head;
+        while (current->next && current->next->data != data) current = current->next;
+        if (!current->next) return;
+
+        Node* temp = current->next;
+        current->next = temp->next;
+        if (temp == tail) tail = current;
+        delete temp;
+        --length;
+    }
+
+    int find(T data) const {
+        Node* current = head;
+        for (int i = 0; current; ++i, current = current->next)
+            if (current->data == data) return i;
+        return -1;
+    }
+
+    void print() const {
+        Node* current = head;
+        while (current) {
+            cout << current->data << ' ';
+            current = current->next;
+        }
+        cout << '\n';
+    }
+
+    int size() const { return length; }
+
+    void clear() {
+        while (head) popFront();
+    }
+};
+
+template<class T>
+class Queue {
+private:
+    struct Node {
+        T data;
+        Node* next;
+    };
+    Node *front, *rear;
+    int count;
+
+public:
+    Queue() : front(nullptr), rear(nullptr), count(0) {}
+
+    ~Queue() { clear(); }
+
+    bool isEmpty() const { return count == 0; }
+
+    int size() const { return count; }
+
+    void enqueue(T data) {
+        Node* node = new Node{data, nullptr};
+        if (isEmpty()) front = rear = node;
+        else { rear->next = node; rear = node; }
+        ++count;
+    }
+
+    void dequeue() {
+        if (isEmpty()) return;
+        Node* temp = front;
+        front = front->next;
+        if (!front) rear = nullptr;
+        delete temp;
+        --count;
+    }
+
+    void print() const {
+        Node* current = front;
+        while (current) {
+            cout << current->data << ' ';
+            current = current->next;
+        }
+        cout << '\n';
+    }
+
+    T getFront() const {
+        assert(front);
+        return front->data;
+    }
+    T getRear() const {
+        assert(rear);
+        return rear->data;
+    }
+
+    void clear() {
+        while (front) dequeue();
+    }
+};
+
+template<class T>
+class Stack {
+private:
+    struct Node {
+        T data;
+        Node* next;
+    };
+    Node* top;
+
+public:
+    Stack() : top(nullptr) {}
+
+    ~Stack() { clear(); }
+
+    bool isEmpty() const { return top == nullptr; }
+
+    void push(T data) {
+        Node* node = new Node{data, top};
+        top = node;
+    }
+
+    void pop() {
+        if (isEmpty()) return;
+        Node* temp = top;
+        top = top->next;
+        delete temp;
+    }
+
+    void print() const {
+        Node* current = top;
+        while (current) {
+            cout << current->data << ' ';
+            current = current->next;
+        }
+        cout << '\n';
+    }
+
+    void clear() {
+        while (top) pop();
+    }
+};
+
+// Forward declarations
+class Menu;
+class DataStructureVisualizer;
+
+// Constants
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 920;
+const int MAX_INPUT_CHARS = 3;
+
+// Enumeration for different data structures
+enum DataStructureType {
+    QUEUE,
+    STACK,
+    LIST,
+    NONE
+};
+
+// Node structure for visualization
+struct Node {
+    int value;
+    Vector2 position;
+    Color color;
+    float alpha;
+
+    Node(int val, Vector2 pos) : value(val), position(pos), color(BLUE), alpha(1.0f) {}
+};
+
+// Menu class to handle UI
+class Menu {
+private:
+    Rectangle queueButton;
+    Rectangle stackButton;
+    Rectangle listButton;
+    Rectangle inputBox;
+    Rectangle addButton;
+    Rectangle removeButton;
+    Rectangle clearButton;
+
+    char inputText[MAX_INPUT_CHARS + 1] = "\0";
+    int letterCount = 0;
+    bool isInputActive = false;
+
+public:
+
+    Menu() {
+        // Initialize buttons
+        queueButton  = {50, 50, 120, 40};
+        stackButton  = {180, 50, 120, 40};
+        listButton   = {310, 50, 120, 40};
+        inputBox     = {50, 100, 100, 40};
+        addButton    = {160, 100, 80, 40};
+        removeButton = {250, 100, 80, 40};
+        clearButton  = {340, 100, 80, 40};
+    }
+
+    void Update(DataStructureType& currentType, int& inputValue, bool& shouldAdd, bool& shouldRemove, bool& shouldClear) {
+        Vector2 mousePoint = GetMousePosition();
+
+        // Handle button clicks
+        if (CheckCollisionPointRec(mousePoint, queueButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            currentType = DataStructureType::QUEUE;
+        if (CheckCollisionPointRec(mousePoint, stackButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            currentType = DataStructureType::STACK;
+        if (CheckCollisionPointRec(mousePoint, listButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            currentType = DataStructureType::LIST;
+
+        // Handle input box
+        if (CheckCollisionPointRec(mousePoint, inputBox)) {
+            isInputActive = true;
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+        }
+        else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            isInputActive = false;
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
+
+        if (isInputActive) {
+            int key = GetCharPressed();
+            while (key > 0) {
+                if ((key >= '0') && (key <= '9') && (letterCount < MAX_INPUT_CHARS)) {
+                    inputText[letterCount] = (char)key;
+                    inputText[letterCount + 1] = '\0';
+                    letterCount++;
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                letterCount--;
+                if (letterCount < 0) letterCount = 0;
+                inputText[letterCount] = '\0';
+            }
+        }
+
+        // Handle operation buttons
+        if (CheckCollisionPointRec(mousePoint, addButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (letterCount > 0) {
+                inputValue = stoi(inputText);
+                shouldAdd = true;
+                inputText[0] = '\0';
+                letterCount = 0;
+            }
+        }
+
+        if (CheckCollisionPointRec(mousePoint, removeButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            shouldRemove = true;
+
+        if (CheckCollisionPointRec(mousePoint, clearButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            shouldClear = true;
+    }
+
+    void Draw(DataStructureType currentType) {
+        // Draw title
+        DrawText("Data Structure Simulator", 50, 10, 30, BLACK);
+
+        // Draw buttons
+        DrawRectangleRec(queueButton, (currentType == DataStructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(stackButton, (currentType == DataStructureType::STACK) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(listButton, (currentType == DataStructureType::LIST) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(addButton, GREEN);
+        DrawRectangleRec(removeButton, RED);
+        DrawRectangleRec(clearButton, ORANGE);
+        DrawRectangleRec(inputBox, LIGHTGRAY);
+
+        // Draw button text
+        DrawText("Queue",   queueButton.x + 30,  queueButton.y + 10, 20,  BLACK);
+        DrawText("Stack",   stackButton.x + 30,  stackButton.y + 10, 20,  BLACK);
+        DrawText("List",    listButton.x + 40,   listButton.y + 10, 20,   BLACK);
+        DrawText("Add",     addButton.x + 20,    addButton.y + 10, 20,    WHITE);
+        DrawText("Remove",  removeButton.x + 10, removeButton.y + 10, 20, WHITE);
+        DrawText("Clear",   clearButton.x + 15,  clearButton.y + 10, 20,  WHITE);
+        DrawText(inputText, inputBox.x + 10,     inputBox.y + 10, 20,     BLACK);
+
+        // Draw instructions based on current data structure
+        const char* instructions = "";
+        switch (currentType) {
+            case DataStructureType::QUEUE:
+                instructions = "Queue: FIFO (First In, First Out) - Elements are removed from the front";
+                break;
+            case DataStructureType::STACK:
+                instructions = "Stack: LIFO (Last In, First Out) - Elements are removed from the top";
+                break;
+            case DataStructureType::LIST:
+                instructions = "List: Elements can be added/removed from any position";
+                break;
+            default:
+                instructions = "Select a data structure to begin";
+        }
+        DrawText(instructions, 50, 150, 20, DARKGRAY);
+    }
+};
+
+// Data Structure Visualizer class
+class DataStructureVisualizer {
+private:
+    vector<Node> nodes;
+    Vector2 startPosition;
+    float nodeSpacing;
+    Queue<Node> animatingNodes;
+
+    void UpdateNodePositions() {
+        for (int i = 0; i < nodes.size(); i++) {
+            Vector2 targetPos = {startPosition.x + i * nodeSpacing, startPosition.y};
+            nodes[i].position = targetPos;
+        }
+    }
+
+public:
+    DataStructureVisualizer() :
+        startPosition({100, 300}),
+        nodeSpacing(80) {}
+
+    void AddNode(int value) {
+        Vector2 newPosition = startPosition;
+        if (!nodes.empty()) {
+            newPosition.x = nodes.back().position.x + nodeSpacing;
+        }
+        nodes.push_back(Node(value, newPosition));
+        UpdateNodePositions();
+    }
+
+    void RemoveNode(DataStructureType type) {
+        if (nodes.empty()) return;
+
+        Node removedNode = (type == DataStructureType::STACK) ? nodes.back() : nodes.front();
+        removedNode.color = RED;
+        animatingNodes.enqueue(removedNode);
+
+        if (type == DataStructureType::STACK)
+            nodes.pop_back();
+        else
+            nodes.erase(nodes.begin());
+
+        UpdateNodePositions();
+    }
+
+    void Clear() {
+        nodes.clear();
+        animatingNodes.clear();
+    }
+
+    void Update() {
+        // Update animating nodes
+        int index = 0;
+        while (index < animatingNodes.size()) {
+            Node node = animatingNodes.getFront();
+            animatingNodes.dequeue();
+
+            node.alpha -= 0.05f;
+            node.position.y -= 2.0f;
+
+            if (node.alpha > 0)
+                animatingNodes.enqueue(node); // Re-enqueue the node if needed
+            ++index;
+        }
+    }
+
+    void Draw(DataStructureType type) {
+        // Draw base line
+        DrawLine(50, 350, SCREEN_WIDTH - 50, 350, LIGHTGRAY);
+
+        // Draw nodes
+        for (int i = 0; i < nodes.size(); i++) {
+            const Node& node = nodes[i];
+
+            // Draw node circle
+            DrawCircle(node.position.x, node.position.y, 30, node.color);
+
+            // Draw value
+            string valueStr = to_string(node.value);
+            DrawText(valueStr.c_str(),
+                    node.position.x - MeasureText(valueStr.c_str(), 20)/2,
+                    node.position.y - 10,
+                    20,
+                    WHITE);
+
+            // Draw arrows based on data structure type
+            if (i < nodes.size() - 1) {
+                DrawLine(node.position.x + 35,
+                        node.position.y,
+                        node.position.x + nodeSpacing - 35,
+                        node.position.y,
+                        DARKGRAY);
+
+                // Draw arrow direction based on structure type
+                if (type == DataStructureType::QUEUE) {
+                    DrawTriangle(
+                        Vector2{node.position.x + nodeSpacing - 35, node.position.y - 5},
+                        Vector2{node.position.x + nodeSpacing - 35, node.position.y + 5},
+                        Vector2{node.position.x + nodeSpacing - 25, node.position.y},
+                        DARKGRAY
+                    );
+                } else if (type == DataStructureType::STACK) {
+                    DrawTriangle(
+                        Vector2{node.position.x + nodeSpacing - 25, node.position.y - 5},
+                        Vector2{node.position.x + nodeSpacing - 25, node.position.y + 5},
+                        Vector2{node.position.x + nodeSpacing - 35, node.position.y},
+                        DARKGRAY
+                    );
+                }
+            }
+        }
+
+        // Draw animating nodes
+        int index = 0;
+        while (index < animatingNodes.size()) {
+            Node node = animatingNodes.getFront();
+            animatingNodes.dequeue();
+
+            Color fadeColor = ColorAlpha(node.color, node.alpha);
+            DrawCircle(node.position.x,
+                       node.position.y,
+                       30,
+                       fadeColor);
+
+            std::string valueStr = std::to_string(node.value);
+            DrawText(valueStr.c_str(),
+                     node.position.x - MeasureText(valueStr.c_str(), 20) / 2,
+                     node.position.y - 10,
+                     20,
+                     ColorAlpha(WHITE, node.alpha));
+
+            animatingNodes.enqueue(node); // Re-enqueue the node if needed
+            ++index;
+        }
+
+        // Draw structure-specific information
+        string sizeInfo = "Size: " + to_string(nodes.size());
+        DrawText(sizeInfo.c_str(), 50, 400, 20, DARKGRAY);
+
+        if (!nodes.empty()) {
+            string frontInfo;
+            if (type == DataStructureType::QUEUE)
+                frontInfo = "Front: " + to_string(nodes.front().value);
+            else if (type == DataStructureType::STACK)
+                frontInfo = "Top: " + to_string(nodes.back().value);
+            DrawText(frontInfo.c_str(), 50, 430, 20, DARKGRAY);
+        }
+    }
+};
+
+int main() {
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Data Structure Educational Simulator");
+    SetTargetFPS(60);
+
+    Menu menu;
+    DataStructureVisualizer visualizer;
+    DataStructureType currentType = DataStructureType::NONE;
+
+    int inputValue = 0;
+    bool shouldAdd = false;
+    bool shouldRemove = false;
+    bool shouldClear = false;
+
+    while (!WindowShouldClose()) {
+        // Update
+        menu.Update(currentType, inputValue, shouldAdd, shouldRemove, shouldClear);
+        visualizer.Update();
+
+        if (shouldAdd) {
+            visualizer.AddNode(inputValue);
+            shouldAdd = false;
+        }
+
+        if (shouldRemove) {
+            visualizer.RemoveNode(currentType);
+            shouldRemove = false;
+        }
+
+        if (shouldClear) {
+            visualizer.Clear();
+            shouldClear = false;
+        }
+
+        // Draw
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            menu.Draw(currentType);
+            if (currentType != DataStructureType::NONE)
+                visualizer.Draw(currentType);
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}
