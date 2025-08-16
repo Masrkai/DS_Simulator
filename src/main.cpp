@@ -29,7 +29,7 @@ int main() {
         visualizer.Update();
 
         if (shouldAdd) {
-            visualizer.AddNode(inputValue);
+            visualizer.AddNode(inputValue, currentType);
             shouldAdd = false;
         }
 

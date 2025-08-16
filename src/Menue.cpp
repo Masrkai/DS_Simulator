@@ -16,7 +16,9 @@ private:
     Rectangle queueButton;
     Rectangle stackButton;
     Rectangle listButton;
+
     Rectangle inputBox;
+
     Rectangle addButton;
     Rectangle removeButton;
     Rectangle clearButton;
@@ -32,7 +34,9 @@ public:
         queueButton  = {50, 50, 120, 40};
         stackButton  = {180, 50, 120, 40};
         listButton   = {310, 50, 120, 40};
+
         inputBox     = {50, 100, 100, 40};
+
         addButton    = {160, 100, 80, 40};
         removeButton = {250, 100, 80, 40};
         clearButton  = {340, 100, 80, 40};
@@ -102,7 +106,9 @@ public:
         DrawRectangleRec(queueButton, (currentType == DataStructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
         DrawRectangleRec(stackButton, (currentType == DataStructureType::STACK) ? SKYBLUE : LIGHTGRAY);
         DrawRectangleRec(listButton, (currentType == DataStructureType::LIST) ? SKYBLUE : LIGHTGRAY);
+
         DrawRectangleRec(addButton, GREEN);
+
         DrawRectangleRec(removeButton, RED);
         DrawRectangleRec(clearButton, ORANGE);
         DrawRectangleRec(inputBox, LIGHTGRAY);
@@ -111,9 +117,11 @@ public:
         DrawText("Queue",   queueButton.x + 30,  queueButton.y + 10, 20,  BLACK);
         DrawText("Stack",   stackButton.x + 30,  stackButton.y + 10, 20,  BLACK);
         DrawText("List",    listButton.x + 40,   listButton.y + 10, 20,   BLACK);
+
         DrawText("Add",     addButton.x + 20,    addButton.y + 10, 20,    WHITE);
         DrawText("Remove",  removeButton.x + 10, removeButton.y + 10, 20, WHITE);
         DrawText("Clear",   clearButton.x + 15,  clearButton.y + 10, 20,  WHITE);
+
         DrawText(inputText, inputBox.x + 10,     inputBox.y + 10, 20,     BLACK);
 
         // Draw instructions based on current data structure
