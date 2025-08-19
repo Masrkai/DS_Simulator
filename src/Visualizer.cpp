@@ -19,7 +19,6 @@ const int SCREEN_HEIGHT = 920;
 
 class DataStructureVisualizer {
 public:
-
     std::vector<Node> nodes;
     Queue<Node> animatingNodes;
 
@@ -28,6 +27,9 @@ public:
     Vector2 startPosList    = {200, 600};
 
     float spacing = 100;
+
+    // NEW: index of node to highlight (-1 = none)
+    int highlightedIndex = -1;
 
     void UpdateNodePositions(StructureType type) {
         for (int i = 0; i < nodes.size(); i++) {
@@ -47,7 +49,6 @@ public:
     void LoadFromList(const LinkedList<int>& list, StructureType type) {
         nodes.clear();
 
-        // If head is public (like your bubble_sort assumes), traverse directly.
         auto cur = list.head;
         while (cur) {
             nodes.push_back(Node(cur->data, {0, 0}));
@@ -55,11 +56,13 @@ public:
         }
 
         UpdateNodePositions(type);
+        highlightedIndex = -1; // reset highlight after reloading
     }
 
     void AddNode(int value, StructureType type) {
         nodes.push_back(Node(value, {0,0}));  // temporary position
         UpdateNodePositions(type);
+        highlightedIndex = -1;
     }
 
     void RemoveNode(StructureType type) {
@@ -75,11 +78,13 @@ public:
             nodes.erase(nodes.begin());
 
         UpdateNodePositions(type);
+        highlightedIndex = -1;
     }
 
     void Clear() {
         nodes.clear();
         animatingNodes.clear();
+        highlightedIndex = -1;
     }
 
     void Update() {
@@ -95,6 +100,15 @@ public:
         }
     }
 
+    // NEW: highlight API
+    void HighlightNode(int index) {
+        if (index >= 0 && index < nodes.size()) {
+            highlightedIndex = index;
+        } else {
+            highlightedIndex = -1; // reset if out of range
+        }
+    }
+
     void Draw(StructureType type) {
         // Layout correction
         UpdateNodePositions(type);
@@ -102,7 +116,13 @@ public:
         for (int i = 0; i < nodes.size(); i++) {
             const Node &node = nodes[i];
 
-            DrawCircle(node.position.x, node.position.y, 30, node.color);
+            // choose color
+            Color nodeColor = node.color;
+            if (i == highlightedIndex) {
+                nodeColor = RED;
+            }
+
+            DrawCircle(node.position.x, node.position.y, 30, nodeColor);
 
             std::string valueStr = std::to_string(node.value);
             DrawText(valueStr.c_str(),

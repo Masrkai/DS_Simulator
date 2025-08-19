@@ -1,25 +1,33 @@
-# pragma once
-# include <iostream>
+#pragma once
+#include <iostream>
 
-template<class Template_Type>
+template<class T>
 class LinkedList {
-// private:
 public:
+    // Node structure for the linked list
     struct Node {
-        Template_Type data;
-        Node* next;
-        Node(Template_Type data, Node* node) : data(data), next(node) {}
+        T data;       // value stored in this node
+        Node* next;   // pointer to the next node
+        Node(T data, Node* next) : data(data), next(next) {}
     };
-    Node *head, *tail;
-    int length;
 
-    // LinkedList() : head(nullptr), tail(nullptr), length(0) {}
+    Node* head;   // first element
+    Node* tail;   // last element
+    int length;   // number of elements
 
+    LinkedList() : head(nullptr), tail(nullptr), length(0) {}
     ~LinkedList() { clear(); }
 
+    // Check if the list is empty
     bool isEmpty() const { return length == 0; }
 
-    void pushBack(Template_Type data) {
+    // Get number of elements in the list
+    int size() const { return length; }
+
+    // ---------------- Insertion methods ----------------
+
+    // Add a new element at the end of the list
+    void append(const T& data) {
         Node* node = new Node{data, nullptr};
         if (isEmpty()) {
             head = tail = node;
@@ -30,33 +38,36 @@ public:
         ++length;
     }
 
-    void pushFront(Template_Type data) {
+    // Add a new element at the beginning of the list
+    void prepend(const T& data) {
         Node* node = new Node{data, head};
         head = node;
-        if (tail == nullptr) tail = node;
+        if (!tail) tail = node;
         ++length;
     }
 
-    void insert(int index, Template_Type data) {
+    // Insert a new element at a specific index
+    void insertAt(int index, const T& data) {
         if (index < 0 || index > length) return;
-        if (index == 0) { pushFront(data); return; }
-        if (index == length) { pushBack(data); return; }
+        if (index == 0) { prepend(data); return; }
+        if (index == length) { append(data); return; }
 
-        Node* node = new Node{data, nullptr};
         Node* current = head;
         for (int i = 1; i < index; ++i) current = current->next;
-        node->next = current->next;
+        Node* node = new Node{data, current->next};
         current->next = node;
         ++length;
     }
 
-    void popBack() {
+    // ---------------- Removal methods ----------------
+
+    // Remove the last element
+    void removeLast() {
         if (isEmpty()) return;
         if (length == 1) {
             delete head;
             head = tail = nullptr;
-        }
-        else {
+        } else {
             Node* current = head;
             while (current->next != tail) current = current->next;
             delete tail;
@@ -66,21 +77,23 @@ public:
         --length;
     }
 
-    void popFront() {
+    // Remove the first element
+    void removeFirst() {
         if (isEmpty()) return;
         Node* temp = head;
         head = head->next;
         delete temp;
-        if (head == nullptr) tail = nullptr;
+        if (!head) tail = nullptr;
         --length;
     }
 
-    void removeAt(int pos) {
-        if (isEmpty() || pos < 0 || pos >= length) return;
-        if (pos == 0) { popFront(); return; }
+    // Remove an element at a specific index
+    void removeAt(int index) {
+        if (isEmpty() || index < 0 || index >= length) return;
+        if (index == 0) { removeFirst(); return; }
 
         Node* current = head;
-        for (int i = 1; i < pos; ++i) current = current->next;
+        for (int i = 1; i < index; ++i) current = current->next;
         Node* temp = current->next;
         current->next = temp->next;
         if (temp == tail) tail = current;
@@ -88,13 +101,15 @@ public:
         --length;
     }
 
-    void remove(Template_Type data) {
+    // Remove the first occurrence of a specific value
+    void removeValue(const T& data) {
         if (isEmpty()) return;
-        if (head->data == data) { popFront(); return; }
+        if (head->data == data) { removeFirst(); return; }
 
         Node* current = head;
-        while (current->next && current->next->data != data) current = current->next;
-        if (!current->next) return;
+        while (current->next && current->next->data != data)
+            current = current->next;
+        if (!current->next) return; // not found
 
         Node* temp = current->next;
         current->next = temp->next;
@@ -103,13 +118,9 @@ public:
         --length;
     }
 
-    int find(Template_Type data) const {
-        Node* current = head;
-        for (int i = 0; current; ++i, current = current->next)
-            if (current->data == data) return i;
-        return -1;
-    }
+    // ---------------- Utility ----------------
 
+    // Print the list contents to stdout
     void print() const {
         Node* current = head;
         while (current) {
@@ -119,9 +130,8 @@ public:
         std::cout << '\n';
     }
 
-    int size() const { return length; }
-
+    // Delete all elements in the list
     void clear() {
-        while (head) popFront();
+        while (head) removeFirst();
     }
 };
