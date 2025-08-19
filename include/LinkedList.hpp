@@ -1,25 +1,25 @@
 # pragma once
 # include <iostream>
 
-template<class T>
+template<class Template_Type>
 class LinkedList {
-private:
+// private:
+public:
     struct Node {
-        T data;
+        Template_Type data;
         Node* next;
-        Node(T data, Node* node) : data(data), next(node) {}
+        Node(Template_Type data, Node* node) : data(data), next(node) {}
     };
     Node *head, *tail;
     int length;
 
-public:
-    LinkedList() : head(nullptr), tail(nullptr), length(0) {}
+    // LinkedList() : head(nullptr), tail(nullptr), length(0) {}
 
     ~LinkedList() { clear(); }
 
     bool isEmpty() const { return length == 0; }
 
-    void pushBack(T data) {
+    void pushBack(Template_Type data) {
         Node* node = new Node{data, nullptr};
         if (isEmpty()) {
             head = tail = node;
@@ -30,14 +30,14 @@ public:
         ++length;
     }
 
-    void pushFront(T data) {
+    void pushFront(Template_Type data) {
         Node* node = new Node{data, head};
         head = node;
         if (tail == nullptr) tail = node;
         ++length;
     }
 
-    void insert(int index, T data) {
+    void insert(int index, Template_Type data) {
         if (index < 0 || index > length) return;
         if (index == 0) { pushFront(data); return; }
         if (index == length) { pushBack(data); return; }
@@ -88,7 +88,7 @@ public:
         --length;
     }
 
-    void remove(T data) {
+    void remove(Template_Type data) {
         if (isEmpty()) return;
         if (head->data == data) { popFront(); return; }
 
@@ -103,7 +103,7 @@ public:
         --length;
     }
 
-    int find(T data) const {
+    int find(Template_Type data) const {
         Node* current = head;
         for (int i = 0; current; ++i, current = current->next)
             if (current->data == data) return i;

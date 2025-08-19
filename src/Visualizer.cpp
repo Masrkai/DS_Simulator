@@ -8,54 +8,68 @@
 
 //? Files
 #include "../include/Node.hpp"
-#include "../include/DataStructureType.hpp"
+#include "../include/StructureType.hpp"
 #include "../include/Queue.hpp"
 #include "../include/Stack.hpp"
 #include "../include/LinkedList.hpp"
 
 // Constants
-const int SCREEN_WIDTH = 1920;
+const int SCREEN_WIDTH = 920;
 const int SCREEN_HEIGHT = 920;
 
 class DataStructureVisualizer {
-private:
+public:
+
     std::vector<Node> nodes;
     Queue<Node> animatingNodes;
 
-    Vector2 startPosQueue   = {200, 300};
+    Vector2 startPosQueue   = {200, 600};
     Vector2 startPosStack   = {200, 600};
-    Vector2 startPosList    = {200, 500};
+    Vector2 startPosList    = {200, 600};
 
     float spacing = 100;
 
-    void UpdateNodePositions(DataStructureType type) {
+    void UpdateNodePositions(StructureType type) {
         for (int i = 0; i < nodes.size(); i++) {
-            if (type == DataStructureType::QUEUE) {
+            if (type == StructureType::QUEUE) {
                 nodes[i].position = { startPosQueue.x + i * spacing, startPosQueue.y };
             }
-            else if (type == DataStructureType::STACK) {
+            else if (type == StructureType::STACK) {
                 nodes[i].position = { startPosStack.x, startPosStack.y - i * spacing };
             }
-            else if (type == DataStructureType::LIST) {
+            else if (type == StructureType::LIST) {
                 nodes[i].position = { startPosList.x + i * spacing, startPosList.y };
             }
         }
     }
 
-public:
-    void AddNode(int value, DataStructureType type) {
+    // Rebuild the visual nodes from the linked list model
+    void LoadFromList(const LinkedList<int>& list, StructureType type) {
+        nodes.clear();
+
+        // If head is public (like your bubble_sort assumes), traverse directly.
+        auto cur = list.head;
+        while (cur) {
+            nodes.push_back(Node(cur->data, {0, 0}));
+            cur = cur->next;
+        }
+
+        UpdateNodePositions(type);
+    }
+
+    void AddNode(int value, StructureType type) {
         nodes.push_back(Node(value, {0,0}));  // temporary position
         UpdateNodePositions(type);
     }
 
-    void RemoveNode(DataStructureType type) {
+    void RemoveNode(StructureType type) {
         if (nodes.empty()) return;
 
-        Node removed = (type == DataStructureType::STACK) ? nodes.back() : nodes.front();
+        Node removed = (type == StructureType::STACK) ? nodes.back() : nodes.front();
         removed.color = RED;
         animatingNodes.enqueue(removed);
 
-        if (type == DataStructureType::STACK)
+        if (type == StructureType::STACK)
             nodes.pop_back();
         else
             nodes.erase(nodes.begin());
@@ -81,7 +95,7 @@ public:
         }
     }
 
-    void Draw(DataStructureType type) {
+    void Draw(StructureType type) {
         // Layout correction
         UpdateNodePositions(type);
 
@@ -98,7 +112,7 @@ public:
                      WHITE);
 
             if (i < nodes.size() - 1) {
-                if (type == DataStructureType::QUEUE || type == DataStructureType::LIST) {
+                if (type == StructureType::QUEUE || type == StructureType::LIST) {
                     DrawLine(node.position.x + 35, node.position.y,
                              node.position.x + spacing - 35, node.position.y, DARKGRAY);
 
@@ -109,7 +123,7 @@ public:
                         DARKGRAY
                     );
                 }
-                else if (type == DataStructureType::STACK) {
+                else if (type == StructureType::STACK) {
                     DrawLine(node.position.x, node.position.y - 35,
                              node.position.x, node.position.y - spacing + 35, DARKGRAY);
 
@@ -121,7 +135,7 @@ public:
                     );
                 }
             }
-            else if (type == DataStructureType::LIST) {
+            else if (type == StructureType::LIST) {
                 DrawText("NULL", node.position.x + 60, node.position.y - 10, 20, DARKGRAY);
             }
         }
@@ -150,14 +164,14 @@ public:
         DrawText(sizeInfo.c_str(), 50, 800, 20, DARKGRAY);
 
         if (!nodes.empty()) {
-            if (type == DataStructureType::QUEUE) {
+            if (type == StructureType::QUEUE) {
                 DrawText(("Front: " + std::to_string(nodes.front().value)).c_str(), 50, 820, 20, DARKGRAY);
                 DrawText(("Rear: " + std::to_string(nodes.back().value)).c_str(), 50, 840, 20, DARKGRAY);
             }
-            else if (type == DataStructureType::STACK) {
+            else if (type == StructureType::STACK) {
                 DrawText(("Top: " + std::to_string(nodes.back().value)).c_str(), 50, 820, 20, DARKGRAY);
             }
-            else if (type == DataStructureType::LIST) {
+            else if (type == StructureType::LIST) {
                 DrawText(("Head: " + std::to_string(nodes.front().value)).c_str(), 50, 820, 20, DARKGRAY);
                 DrawText(("Tail: " + std::to_string(nodes.back().value)).c_str(), 50, 840, 20, DARKGRAY);
             }

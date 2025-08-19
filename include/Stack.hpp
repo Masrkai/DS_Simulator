@@ -1,11 +1,11 @@
 # pragma once
 #include <iostream>
 
-template<class T>
+template<class Template_Type>
 class Stack {
 private:
     struct Node {
-        T data;
+        Template_Type data;
         Node* next;
     };
     Node* top;
@@ -17,7 +17,7 @@ public:
 
     bool isEmpty() const { return top == nullptr; }
 
-    void push(T data) {
+    void push(Template_Type data) {
         Node* node = new Node{data, top};
         top = node;
     }

@@ -5,7 +5,7 @@
 
 
 // Enumeration for different data structures
-enum DataStructureType {
+enum StructureType {
     QUEUE,
     STACK,
     LIST,

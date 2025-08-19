@@ -1,11 +1,11 @@
 # pragma once
 # include <iostream>
 
-template<class T>
+template<class Template_Type>
 class Queue {
 private:
     struct Node {
-        T data;
+        Template_Type data;
         Node* next;
     };
     Node *front, *rear;
@@ -20,7 +20,7 @@ public:
 
     int size() const { return count; }
 
-    void enqueue(T data) {
+    void enqueue(Template_Type data) {
         Node* node = new Node{data, nullptr};
         if (isEmpty()) front = rear = node;
         else { rear->next = node; rear = node; }
@@ -45,11 +45,11 @@ public:
         std::cout << '\n';
     }
 
-    T getFront() const {
+    Template_Type getFront() const {
         assert(front);
         return front->data;
     }
-    T getRear() const {
+    Template_Type getRear() const {
         assert(rear);
         return rear->data;
     }

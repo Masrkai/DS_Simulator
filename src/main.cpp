@@ -1,7 +1,7 @@
 //? cpp standard libraries
 #include <iostream>
-#include <cassert>
-#include <vector>
+// #include <cassert>
+// #include <vector>
 
 //? installed libraries
 #include <raylib.h>
@@ -9,6 +9,11 @@
 //? Files
 #include"Menue.cpp"
 #include"Visualizer.cpp"
+#include "../include/Sorting/Bubble_sort.cpp"
+
+
+
+
 
 int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Data Structure Educational Simulator");
@@ -16,16 +21,18 @@ int main() {
 
     Menu menu;
     DataStructureVisualizer visualizer;
-    DataStructureType currentType = DataStructureType::NONE;
+    StructureType currentType = StructureType::NONE;
 
     int inputValue = 0;
     bool shouldAdd = false;
     bool shouldRemove = false;
     bool shouldClear = false;
+    bool shouldBubbleSort = false;   // <-- missing
+
 
     while (!WindowShouldClose()) {
         // Update
-        menu.Update(currentType, inputValue, shouldAdd, shouldRemove, shouldClear);
+        menu.Update(currentType, inputValue, shouldAdd, shouldRemove, shouldClear, shouldBubbleSort);
         visualizer.Update();
 
         if (shouldAdd) {
@@ -43,11 +50,15 @@ int main() {
             shouldClear = false;
         }
 
+        if (shouldBubbleSort) {
+            shouldBubbleSort = false;
+        }
+
         // Draw
         BeginDrawing();
             ClearBackground(RAYWHITE);
             menu.Draw(currentType);
-            if (currentType != DataStructureType::NONE)
+            if (currentType != StructureType::NONE)
                 visualizer.Draw(currentType);
         EndDrawing();
     }

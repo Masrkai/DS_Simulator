@@ -40,6 +40,6 @@ pkgs.mkShell {
     clang-tools #it has clangd
    ];
 
-# running:  gcc main.cpp -lraylib -lstdc++ -o main
+# running: gcc main.cpp -lraylib -lstdc++ -o main && ./main
 
 }

@@ -6,7 +6,7 @@
 #include <raylib.h>
 
 //? Files
-#include"../include/DataStructureType.hpp"
+#include"../include/StructureType.hpp"
 
 const int MAX_INPUT_CHARS = 3;
 
@@ -23,6 +23,9 @@ private:
     Rectangle removeButton;
     Rectangle clearButton;
 
+    Rectangle BubbleSortButton;
+
+
     char inputText[MAX_INPUT_CHARS + 1] = "\0";
     int letterCount = 0;
     bool isInputActive = false;
@@ -31,34 +34,37 @@ public:
 
     Menu() {
         // Initialize buttons
-        queueButton  = {50, 50, 120, 40};
-        stackButton  = {180, 50, 120, 40};
-        listButton   = {310, 50, 120, 40};
+        queueButton      = {50, 50, 120, 40};
+        stackButton      = {180, 50, 120, 40};
+        listButton       = {310, 50, 120, 40};
 
-        inputBox     = {50, 100, 100, 40};
+        inputBox         = {50, 100, 100, 40};
 
-        addButton    = {160, 100, 80, 40};
-        removeButton = {250, 100, 80, 40};
-        clearButton  = {340, 100, 80, 40};
+        addButton        = {160, 100, 80, 40};
+        removeButton     = {250, 100, 80, 40};
+        clearButton      = {340, 100, 80, 40};
+
+        BubbleSortButton = {550, 100, 80, 40};
     }
 
-    void Update(DataStructureType& currentType, int& inputValue, bool& shouldAdd, bool& shouldRemove, bool& shouldClear) {
+    void Update(StructureType& currentType, int& inputValue,
+                            bool& shouldAdd, bool& shouldRemove, bool& shouldClear,
+                            bool& shouldBubbleSort) {
         Vector2 mousePoint = GetMousePosition();
 
         // Handle button clicks
         if (CheckCollisionPointRec(mousePoint, queueButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::QUEUE;
+            currentType = StructureType::QUEUE;
         if (CheckCollisionPointRec(mousePoint, stackButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::STACK;
+            currentType = StructureType::STACK;
         if (CheckCollisionPointRec(mousePoint, listButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::LIST;
+            currentType = StructureType::LIST;
 
         // Handle input box
         if (CheckCollisionPointRec(mousePoint, inputBox)) {
             isInputActive = true;
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
-        }
-        else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             isInputActive = false;
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
@@ -96,44 +102,53 @@ public:
 
         if (CheckCollisionPointRec(mousePoint, clearButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             shouldClear = true;
+
+        if (CheckCollisionPointRec(mousePoint, BubbleSortButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            shouldBubbleSort = true;
+        }
     }
 
-    void Draw(DataStructureType currentType) {
+    void Draw(StructureType currentType) {
         // Draw title
         DrawText("Data Structure Simulator", 50, 10, 30, BLACK);
 
         // Draw buttons
-        DrawRectangleRec(queueButton, (currentType == DataStructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
-        DrawRectangleRec(stackButton, (currentType == DataStructureType::STACK) ? SKYBLUE : LIGHTGRAY);
-        DrawRectangleRec(listButton, (currentType == DataStructureType::LIST) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(queueButton, (currentType == StructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(stackButton, (currentType == StructureType::STACK) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(listButton, (currentType == StructureType::LIST) ? SKYBLUE : LIGHTGRAY);
 
         DrawRectangleRec(addButton, GREEN);
 
         DrawRectangleRec(removeButton, RED);
         DrawRectangleRec(clearButton, ORANGE);
         DrawRectangleRec(inputBox, LIGHTGRAY);
+        DrawRectangleRec(BubbleSortButton, PURPLE);
+
 
         // Draw button text
         DrawText("Queue",   queueButton.x + 30,  queueButton.y + 10, 20,  BLACK);
         DrawText("Stack",   stackButton.x + 30,  stackButton.y + 10, 20,  BLACK);
         DrawText("List",    listButton.x + 40,   listButton.y + 10, 20,   BLACK);
 
+        DrawText(inputText, inputBox.x + 10,     inputBox.y + 10, 20,     BLACK);
+
         DrawText("Add",     addButton.x + 20,    addButton.y + 10, 20,    WHITE);
         DrawText("Remove",  removeButton.x + 10, removeButton.y + 10, 20, WHITE);
         DrawText("Clear",   clearButton.x + 15,  clearButton.y + 10, 20,  WHITE);
 
-        DrawText(inputText, inputBox.x + 10,     inputBox.y + 10, 20,     BLACK);
+        DrawText("BubbleSort", BubbleSortButton.x + 5, BubbleSortButton.y + 10, 15, WHITE);
+
 
         // Draw instructions based on current data structure
         const char* instructions = "";
         switch (currentType) {
-            case DataStructureType::QUEUE:
+            case StructureType::QUEUE:
                 instructions = "Queue: FIFO (First In, First Out) - Elements are removed from the front";
                 break;
-            case DataStructureType::STACK:
+            case StructureType::STACK:
                 instructions = "Stack: LIFO (Last In, First Out) - Elements are removed from the top";
                 break;
-            case DataStructureType::LIST:
+            case StructureType::LIST:
                 instructions = "List: Elements can be added/removed from any position";
                 break;
             default:

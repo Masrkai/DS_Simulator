@@ -239,7 +239,7 @@ const int SCREEN_HEIGHT = 920;
 const int MAX_INPUT_CHARS = 3;
 
 // Enumeration for different data structures
-enum DataStructureType {
+enum StructureType {
     QUEUE,
     STACK,
     LIST,
@@ -284,16 +284,16 @@ public:
         clearButton  = {340, 100, 80, 40};
     }
 
-    void Update(DataStructureType& currentType, int& inputValue, bool& shouldAdd, bool& shouldRemove, bool& shouldClear) {
+    void Update(StructureType& currentType, int& inputValue, bool& shouldAdd, bool& shouldRemove, bool& shouldClear) {
         Vector2 mousePoint = GetMousePosition();
 
         // Handle button clicks
         if (CheckCollisionPointRec(mousePoint, queueButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::QUEUE;
+            currentType = StructureType::QUEUE;
         if (CheckCollisionPointRec(mousePoint, stackButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::STACK;
+            currentType = StructureType::STACK;
         if (CheckCollisionPointRec(mousePoint, listButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            currentType = DataStructureType::LIST;
+            currentType = StructureType::LIST;
 
         // Handle input box
         if (CheckCollisionPointRec(mousePoint, inputBox)) {
@@ -340,14 +340,14 @@ public:
             shouldClear = true;
     }
 
-    void Draw(DataStructureType currentType) {
+    void Draw(StructureType currentType) {
         // Draw title
         DrawText("Data Structure Simulator", 50, 10, 30, BLACK);
 
         // Draw buttons
-        DrawRectangleRec(queueButton, (currentType == DataStructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
-        DrawRectangleRec(stackButton, (currentType == DataStructureType::STACK) ? SKYBLUE : LIGHTGRAY);
-        DrawRectangleRec(listButton, (currentType == DataStructureType::LIST) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(queueButton, (currentType == StructureType::QUEUE) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(stackButton, (currentType == StructureType::STACK) ? SKYBLUE : LIGHTGRAY);
+        DrawRectangleRec(listButton, (currentType == StructureType::LIST) ? SKYBLUE : LIGHTGRAY);
         DrawRectangleRec(addButton, GREEN);
         DrawRectangleRec(removeButton, RED);
         DrawRectangleRec(clearButton, ORANGE);
@@ -365,13 +365,13 @@ public:
         // Draw instructions based on current data structure
         const char* instructions = "";
         switch (currentType) {
-            case DataStructureType::QUEUE:
+            case StructureType::QUEUE:
                 instructions = "Queue: FIFO (First In, First Out) - Elements are removed from the front";
                 break;
-            case DataStructureType::STACK:
+            case StructureType::STACK:
                 instructions = "Stack: LIFO (Last In, First Out) - Elements are removed from the top";
                 break;
-            case DataStructureType::LIST:
+            case StructureType::LIST:
                 instructions = "List: Elements can be added/removed from any position";
                 break;
             default:
@@ -410,14 +410,14 @@ public:
         UpdateNodePositions();
     }
 
-    void RemoveNode(DataStructureType type) {
+    void RemoveNode(StructureType type) {
         if (nodes.empty()) return;
 
-        Node removedNode = (type == DataStructureType::STACK) ? nodes.back() : nodes.front();
+        Node removedNode = (type == StructureType::STACK) ? nodes.back() : nodes.front();
         removedNode.color = RED;
         animatingNodes.enqueue(removedNode);
 
-        if (type == DataStructureType::STACK)
+        if (type == StructureType::STACK)
             nodes.pop_back();
         else
             nodes.erase(nodes.begin());
@@ -446,7 +446,7 @@ public:
         }
     }
 
-    void Draw(DataStructureType type) {
+    void Draw(StructureType type) {
         // Draw base line
         DrawLine(50, 350, SCREEN_WIDTH - 50, 350, LIGHTGRAY);
 
@@ -474,14 +474,14 @@ public:
                         DARKGRAY);
 
                 // Draw arrow direction based on structure type
-                if (type == DataStructureType::QUEUE) {
+                if (type == StructureType::QUEUE) {
                     DrawTriangle(
                         Vector2{node.position.x + nodeSpacing - 35, node.position.y - 5},
                         Vector2{node.position.x + nodeSpacing - 35, node.position.y + 5},
                         Vector2{node.position.x + nodeSpacing - 25, node.position.y},
                         DARKGRAY
                     );
-                } else if (type == DataStructureType::STACK) {
+                } else if (type == StructureType::STACK) {
                     DrawTriangle(
                         Vector2{node.position.x + nodeSpacing - 25, node.position.y - 5},
                         Vector2{node.position.x + nodeSpacing - 25, node.position.y + 5},
@@ -521,9 +521,9 @@ public:
 
         if (!nodes.empty()) {
             string frontInfo;
-            if (type == DataStructureType::QUEUE)
+            if (type == StructureType::QUEUE)
                 frontInfo = "Front: " + to_string(nodes.front().value);
-            else if (type == DataStructureType::STACK)
+            else if (type == StructureType::STACK)
                 frontInfo = "Top: " + to_string(nodes.back().value);
             DrawText(frontInfo.c_str(), 50, 430, 20, DARKGRAY);
         }
@@ -536,7 +536,7 @@ int main() {
 
     Menu menu;
     DataStructureVisualizer visualizer;
-    DataStructureType currentType = DataStructureType::NONE;
+    StructureType currentType = StructureType::NONE;
 
     int inputValue = 0;
     bool shouldAdd = false;
@@ -567,7 +567,7 @@ int main() {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             menu.Draw(currentType);
-            if (currentType != DataStructureType::NONE)
+            if (currentType != StructureType::NONE)
                 visualizer.Draw(currentType);
         EndDrawing();
     }
